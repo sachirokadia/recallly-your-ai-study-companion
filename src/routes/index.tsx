@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import {
-  Sparkles, FileText, Youtube, Brain, Layers, BarChart3, Calendar,
+  Sparkles, FileText, Youtube as YoutubeIcon, Brain, Layers, BarChart3, Calendar,
   MessageSquareText, Zap, ArrowRight, Play, Upload, GraduationCap,
   Flame, Trophy, Target, BookOpen, Wand2, MoonStar,
 } from "lucide-react";
