@@ -190,7 +190,7 @@ function LogoStrip() {
 
 const FEATURES = [
   { icon: FileText, color: "bg-grape/15 text-grape", title: "PDF & Notes", desc: "Drop a PDF or scanned notes. Get instant summaries, key points, and Q&A." },
-  { icon: Youtube, color: "bg-coral/20 text-coral", title: "YouTube → Notes", desc: "Paste any video link. Recallly extracts chapters, notes, and quizzes." },
+  { icon: YoutubeIcon, color: "bg-coral/20 text-coral", title: "YouTube → Notes", desc: "Paste any video link. Recallly extracts chapters, notes, and quizzes." },
   { icon: Layers, color: "bg-sky/25 text-[oklch(0.4_0.14_245)]", title: "Smart Flashcards", desc: "Auto-generated, spaced-repetition cards with swipe & flip animations." },
   { icon: Brain, color: "bg-mint/25 text-[oklch(0.4_0.12_165)]", title: "AI Tutor", desc: "Ask anything. Get answers in Hinglish, plain English, or exam-style." },
   { icon: BarChart3, color: "bg-sunny/30 text-[oklch(0.45_0.14_70)]", title: "Study Analytics", desc: "Track time, weak topics, streaks and confidence — beautifully visualized." },
