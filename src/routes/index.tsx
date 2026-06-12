@@ -72,12 +72,12 @@ function Nav() {
         <a href="#analytics" className="hover:text-foreground transition">Analytics</a>
       </nav>
       <div className="flex items-center gap-2">
-        <button className="hidden sm:inline-flex px-4 py-2 rounded-2xl text-sm font-semibold text-foreground/80 hover:bg-white/60 transition">
+        <a href="/auth" className="hidden sm:inline-flex px-4 py-2 rounded-2xl text-sm font-semibold text-foreground/80 hover:bg-white/60 transition">
           Log in
-        </button>
-        <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-semibold text-white bg-[image:var(--gradient-brand)] shadow-soft hover:shadow-glow transition-all hover:-translate-y-0.5">
+        </a>
+        <a href="/auth" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-semibold text-white bg-[image:var(--gradient-brand)] shadow-soft hover:shadow-glow transition-all hover:-translate-y-0.5">
           Get started <ArrowRight className="h-4 w-4" />
-        </button>
+        </a>
       </div>
     </motion.header>
   );
