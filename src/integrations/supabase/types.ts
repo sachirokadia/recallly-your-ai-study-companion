@@ -14,7 +14,204 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      decks: {
+        Row: {
+          created_at: string
+          id: string
+          source_name: string | null
+          source_type: string
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          source_name?: string | null
+          source_type?: string
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          source_name?: string | null
+          source_type?: string
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      flashcards: {
+        Row: {
+          back: string
+          confidence: number
+          created_at: string
+          deck_id: string
+          front: string
+          id: string
+          order_index: number
+          user_id: string
+        }
+        Insert: {
+          back: string
+          confidence?: number
+          created_at?: string
+          deck_id: string
+          front: string
+          id?: string
+          order_index?: number
+          user_id: string
+        }
+        Update: {
+          back?: string
+          confidence?: number
+          created_at?: string
+          deck_id?: string
+          front?: string
+          id?: string
+          order_index?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_deck_id_fkey"
+            columns: ["deck_id"]
+            isOneToOne: false
+            referencedRelation: "decks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          current_streak: number
+          display_name: string | null
+          goals: string | null
+          id: string
+          last_study_at: string | null
+          level: number
+          longest_streak: number
+          subjects: string[]
+          updated_at: string
+          xp: number
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          current_streak?: number
+          display_name?: string | null
+          goals?: string | null
+          id: string
+          last_study_at?: string | null
+          level?: number
+          longest_streak?: number
+          subjects?: string[]
+          updated_at?: string
+          xp?: number
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          current_streak?: number
+          display_name?: string | null
+          goals?: string | null
+          id?: string
+          last_study_at?: string | null
+          level?: number
+          longest_streak?: number
+          subjects?: string[]
+          updated_at?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          quiz_id: string
+          score: number
+          time_seconds: number
+          total: number
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          quiz_id: string
+          score: number
+          time_seconds?: number
+          total: number
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          quiz_id?: string
+          score?: number
+          time_seconds?: number
+          total?: number
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          created_at: string
+          deck_id: string | null
+          id: string
+          questions: Json
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deck_id?: string | null
+          id?: string
+          questions?: Json
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deck_id?: string | null
+          id?: string
+          questions?: Json
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quizzes_deck_id_fkey"
+            columns: ["deck_id"]
+            isOneToOne: false
+            referencedRelation: "decks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
