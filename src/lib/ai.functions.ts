@@ -92,7 +92,6 @@ ${data.content.slice(0, 50_000)}
       .single();
 
     // bump streak/XP
-    await supabase.rpc("noop").catch(() => {});
     const today = new Date();
     const { data: prof } = await supabase
       .from("profiles")

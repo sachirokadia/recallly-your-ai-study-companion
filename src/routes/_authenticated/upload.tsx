@@ -19,8 +19,6 @@ export const Route = createFileRoute("/_authenticated/upload")({
 
 async function extractPdfText(file: File): Promise<string> {
   const pdfjs = await import("pdfjs-dist");
-  // worker
-  // @ts-expect-error vite worker import
   const worker = (await import("pdfjs-dist/build/pdf.worker.mjs?url")).default;
   pdfjs.GlobalWorkerOptions.workerSrc = worker;
   const buf = await file.arrayBuffer();
@@ -30,7 +28,7 @@ async function extractPdfText(file: File): Promise<string> {
   for (let i = 1; i <= maxPages; i++) {
     const page = await pdf.getPage(i);
     const c = await page.getTextContent();
-    out += c.items.map((it: { str?: string }) => it.str ?? "").join(" ") + "\n\n";
+    out += c.items.map((it) => ("str" in it ? it.str : "")).join(" ") + "\n\n";
   }
   return out.trim();
 }
