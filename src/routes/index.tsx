@@ -118,9 +118,9 @@ function Hero() {
         variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.2 }}
         className="mt-8 flex flex-wrap items-center justify-center gap-3"
       >
-        <button className="group inline-flex items-center gap-2 rounded-2xl bg-[image:var(--gradient-brand)] px-6 py-3.5 text-sm font-semibold text-white shadow-float hover:shadow-glow transition-all hover:-translate-y-0.5">
+        <a href="/auth" className="group inline-flex items-center gap-2 rounded-2xl bg-[image:var(--gradient-brand)] px-6 py-3.5 text-sm font-semibold text-white shadow-float hover:shadow-glow transition-all hover:-translate-y-0.5">
           Get Started <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-        </button>
+        </a>
         <button className="inline-flex items-center gap-2 rounded-2xl glass px-6 py-3.5 text-sm font-semibold text-foreground hover:bg-white/80 transition">
           <Play className="h-4 w-4 fill-current" /> Watch demo
         </button>
@@ -501,9 +501,9 @@ function CTA() {
           Join 120,000+ students turning panic into confidence. Free to start. No card required.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <button className="inline-flex items-center gap-2 rounded-2xl bg-[image:var(--gradient-brand)] px-7 py-4 text-sm font-bold text-white shadow-float hover:shadow-glow transition-all hover:-translate-y-0.5">
+          <a href="/auth" className="inline-flex items-center gap-2 rounded-2xl bg-[image:var(--gradient-brand)] px-7 py-4 text-sm font-bold text-white shadow-float hover:shadow-glow transition-all hover:-translate-y-0.5">
             Get started free <ArrowRight className="h-4 w-4" />
-          </button>
+          </a>
           <button className="inline-flex items-center gap-2 rounded-2xl glass px-7 py-4 text-sm font-bold hover:bg-white/80 transition">
             Talk to us
           </button>
