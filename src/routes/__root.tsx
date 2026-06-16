@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { RuntimeDiagnostics } from "@/components/runtime-diagnostics";
+import { BlankScreenFallback } from "@/components/blank-screen-fallback";
 
 function NotFoundComponent() {
   return (
@@ -122,6 +124,8 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster richColors position="top-right" />
+      <RuntimeDiagnostics />
+      <BlankScreenFallback />
     </QueryClientProvider>
   );
 }
