@@ -3,6 +3,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, RefreshCw, X, Package } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { logClientDiagnostic } from "@/lib/diagnostics.functions";
+import {
+  detectDependency,
+  getLastChunkAttempt,
+  getSessionId,
+  isChunkLoadError,
+  newEventId,
+  persistIssue,
+  recordChunkAttempt,
+} from "@/lib/diagnostics-client";
 
 type RuntimeIssue = {
   kind: "chunk-load" | "vite-error" | "unhandled" | "promise";
@@ -11,28 +20,8 @@ type RuntimeIssue = {
   dependency?: string;
   stack?: string;
   at: number;
+  eventId: string;
 };
-
-const DEP_PATTERNS: Array<{ re: RegExp; name: string }> = [
-  { re: /@radix-ui[_/]react-slot/i, name: "@radix-ui/react-slot" },
-  { re: /@radix-ui[_/]([\w-]+)/i, name: "@radix-ui/*" },
-  { re: /\bclsx\b/i, name: "clsx" },
-  { re: /@lovable[_/.]+dev[_/]cloud-auth-js/i, name: "@lovable.dev/cloud-auth-js" },
-  { re: /@supabase[_/]supabase-js/i, name: "@supabase/supabase-js" },
-  { re: /\bpdfjs-dist\b/i, name: "pdfjs-dist" },
-  { re: /\bframer-motion\b/i, name: "framer-motion" },
-  { re: /\breact-dropzone\b/i, name: "react-dropzone" },
-  { re: /\bcanvas-confetti\b/i, name: "canvas-confetti" },
-  { re: /node_modules\/\.vite\/deps\/([^.?]+)/i, name: "" },
-];
-
-function detectDependency(text: string): string | undefined {
-  for (const { re, name } of DEP_PATTERNS) {
-    const m = text.match(re);
-    if (m) return name || m[1];
-  }
-  return undefined;
-}
 
 export function RuntimeDiagnostics() {
   const [issue, setIssue] = useState<RuntimeIssue | null>(null);
@@ -40,17 +29,50 @@ export function RuntimeDiagnostics() {
   const report = useServerFn(logClientDiagnostic);
 
   useEffect(() => {
-    function record(next: RuntimeIssue) {
-      setIssue(next);
+    const sessionId = getSessionId();
+
+    // Track chunk load attempts via PerformanceObserver so we know the last
+    // resource the browser tried to fetch before any error.
+    let perfObs: PerformanceObserver | null = null;
+    try {
+      perfObs = new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) {
+          const url = (e as PerformanceResourceTiming).name;
+          if (url && /\.(js|mjs|css)(\?|$)/.test(url)) recordChunkAttempt(url);
+        }
+      });
+      perfObs.observe({ type: "resource", buffered: true });
+    } catch {}
+
+    function record(next: Omit<RuntimeIssue, "eventId"> & { eventId?: string }) {
+      const eventId = next.eventId ?? newEventId();
+      const full: RuntimeIssue = { ...next, eventId };
+      setIssue(full);
       setDismissed(false);
+      const lastChunk = getLastChunkAttempt();
+      persistIssue({
+        eventId,
+        sessionId,
+        kind: full.kind,
+        message: full.message,
+        dependency: full.dependency,
+        url: full.url,
+        route: window.location.pathname,
+        at: full.at,
+      });
       report({
         data: {
-          kind: next.kind,
-          message: next.message,
-          url: next.url,
-          stack: next.stack,
+          kind: full.kind,
+          message: full.message,
+          url: full.url,
+          stack: full.stack,
+          dependency: full.dependency,
           userAgent: navigator.userAgent,
           route: window.location.pathname,
+          sessionId,
+          eventId,
+          lastChunkUrl: lastChunk?.url,
+          lastChunkAt: lastChunk?.at,
         },
       }).catch(() => {});
     }
@@ -58,26 +80,25 @@ export function RuntimeDiagnostics() {
     function onError(e: ErrorEvent) {
       const msg = e.message || String(e.error);
       const url = (e.filename || "") + "";
-      const dep = detectDependency(msg + " " + url);
-      const isChunk = /Failed to fetch dynamically imported module|Loading chunk|504|ChunkLoadError|Importing a module script failed/i.test(msg);
+      const stack = e.error?.stack as string | undefined;
+      const dep = detectDependency(msg, url, stack, getLastChunkAttempt()?.url);
       record({
-        kind: isChunk ? "chunk-load" : "unhandled",
+        kind: isChunkLoadError(msg) ? "chunk-load" : "unhandled",
         message: msg,
         url,
         dependency: dep,
-        stack: e.error?.stack,
+        stack,
         at: Date.now(),
       });
     }
 
     function onRejection(e: PromiseRejectionEvent) {
-      const reason = e.reason;
+      const reason = e.reason as { message?: string; stack?: string } | string;
       const msg = typeof reason === "string" ? reason : reason?.message || String(reason);
-      const stack = reason?.stack;
-      const dep = detectDependency(msg + " " + (stack || ""));
-      const isChunk = /Failed to fetch dynamically imported module|Loading chunk|504|ChunkLoadError/i.test(msg);
+      const stack = typeof reason === "string" ? undefined : reason?.stack;
+      const dep = detectDependency(msg, stack, getLastChunkAttempt()?.url);
       record({
-        kind: isChunk ? "chunk-load" : "promise",
+        kind: isChunkLoadError(msg) ? "chunk-load" : "promise",
         message: msg,
         dependency: dep,
         stack,
@@ -86,11 +107,14 @@ export function RuntimeDiagnostics() {
     }
 
     function onViteError(e: Event) {
-      const detail = (e as CustomEvent).detail as { err?: { message?: string; stack?: string; loc?: { file?: string } } } | undefined;
+      const detail = (e as CustomEvent).detail as
+        | { err?: { message?: string; stack?: string; loc?: { file?: string } } }
+        | undefined;
       const msg = detail?.err?.message || "Vite reported an error";
       const file = detail?.err?.loc?.file || "";
-      const dep = detectDependency(msg + " " + file);
-      record({ kind: "vite-error", message: msg, url: file, dependency: dep, stack: detail?.err?.stack, at: Date.now() });
+      const stack = detail?.err?.stack;
+      const dep = detectDependency(msg, file, stack);
+      record({ kind: "vite-error", message: msg, url: file, dependency: dep, stack, at: Date.now() });
     }
 
     window.addEventListener("error", onError);
@@ -100,6 +124,7 @@ export function RuntimeDiagnostics() {
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
       window.removeEventListener("vite:error", onViteError as EventListener);
+      perfObs?.disconnect();
     };
   }, [report]);
 
@@ -128,10 +153,10 @@ export function RuntimeDiagnostics() {
             </div>
             {issue.dependency && (
               <div className="mt-1.5 inline-flex items-center gap-1.5 text-xs rounded-md bg-muted px-2 py-1 font-mono">
-                <Package className="size-3" />
-                {issue.dependency}
+                <Package className="size-3" /> {issue.dependency}
               </div>
             )}
+            <p className="text-[10px] text-muted-foreground mt-1 font-mono">id: {issue.eventId}</p>
             <p className="text-xs text-muted-foreground mt-2 line-clamp-3 break-words">{issue.message}</p>
             <div className="mt-3 flex gap-2">
               <button
