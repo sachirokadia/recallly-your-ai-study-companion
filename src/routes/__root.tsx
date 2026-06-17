@@ -14,6 +14,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { RuntimeDiagnostics } from "@/components/runtime-diagnostics";
 import { BlankScreenFallback } from "@/components/blank-screen-fallback";
+import { PostReloadBanner } from "@/components/post-reload-banner";
+import { StartupHealthCheck } from "@/components/startup-health-check";
 
 function NotFoundComponent() {
   return (
