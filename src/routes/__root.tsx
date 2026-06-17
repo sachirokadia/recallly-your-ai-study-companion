@@ -127,6 +127,8 @@ function RootComponent() {
       <Outlet />
       <Toaster richColors position="top-right" />
       <RuntimeDiagnostics />
+      <PostReloadBanner />
+      <StartupHealthCheck />
       <BlankScreenFallback />
     </QueryClientProvider>
   );
