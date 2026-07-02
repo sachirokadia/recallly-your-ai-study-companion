@@ -6,6 +6,7 @@
  *
  * Run with: `bun test src/test/diagnostics.test.ts`
  */
+// @ts-expect-error - bun:test is provided at runtime by `bun test`
 import { describe, it, expect, beforeEach } from "bun:test";
 
 // jsdom-lite: give the module a sessionStorage before importing.
