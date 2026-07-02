@@ -29,6 +29,7 @@ export function RuntimeDiagnostics() {
   const [issue, setIssue] = useState<RuntimeIssue | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const report = useServerFn(logClientDiagnostic);
+  const reportAction = useServerFn(logClientDiagnosticAction);
 
   useEffect(() => {
     const sessionId = getSessionId();
