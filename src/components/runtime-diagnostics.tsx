@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle, RefreshCw, X, Package } from "lucide-react";
+import { AlertTriangle, RefreshCw, X, Package, MapPin, Link2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { logClientDiagnostic } from "@/lib/diagnostics.functions";
+import { logClientDiagnostic, logClientDiagnosticAction } from "@/lib/diagnostics.functions";
 import {
   detectDependency,
   getLastChunkAttempt,
   getSessionId,
+  hardReload,
   isChunkLoadError,
   newEventId,
   persistIssue,
+  pushTimeline,
   recordChunkAttempt,
 } from "@/lib/diagnostics-client";
 
