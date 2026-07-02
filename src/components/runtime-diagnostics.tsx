@@ -135,6 +135,22 @@ export function RuntimeDiagnostics() {
 
   if (!issue || dismissed) return null;
 
+  const lastChunk = getLastChunkAttempt();
+  const route = typeof window !== "undefined" ? window.location.pathname : undefined;
+  const track = (action: "reload" | "hard-reload" | "run-diagnostics" | "dismiss", detail?: string) => {
+    pushTimeline(`action:${action}`, detail);
+    reportAction({
+      data: {
+        action,
+        detail,
+        sessionId: getSessionId(),
+        eventId: issue.eventId,
+        route,
+        dependency: issue.dependency,
+      },
+    }).catch(() => {});
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -152,7 +168,14 @@ export function RuntimeDiagnostics() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <h3 className="font-semibold text-sm">A module failed to load</h3>
-              <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => {
+                  track("dismiss");
+                  setDismissed(true);
+                }}
+                aria-label="Dismiss"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="size-4" />
               </button>
             </div>
@@ -161,17 +184,42 @@ export function RuntimeDiagnostics() {
                 <Package className="size-3" /> {issue.dependency}
               </div>
             )}
-            <p className="text-[10px] text-muted-foreground mt-1 font-mono">id: {issue.eventId}</p>
+            <div className="mt-2 space-y-0.5 text-[10px] text-muted-foreground font-mono">
+              <p>cid: {getSessionId()}/{issue.eventId}</p>
+              {route && (
+                <p className="flex items-center gap-1">
+                  <MapPin className="size-2.5" /> {route}
+                </p>
+              )}
+              {lastChunk?.url && (
+                <p className="flex items-center gap-1 truncate" title={lastChunk.url}>
+                  <Link2 className="size-2.5 shrink-0" /> {lastChunk.url}
+                </p>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground mt-2 line-clamp-3 break-words">{issue.message}</p>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <button
-                onClick={() => location.reload()}
+                onClick={() => {
+                  track("reload");
+                  location.reload();
+                }}
                 className="inline-flex items-center gap-1.5 text-xs font-medium rounded-lg bg-foreground text-background px-3 py-1.5 hover:opacity-90"
               >
                 <RefreshCw className="size-3" /> Reload
               </button>
+              <button
+                onClick={() => {
+                  track("hard-reload");
+                  hardReload();
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-medium rounded-lg border border-border px-3 py-1.5 hover:bg-muted"
+              >
+                Hard reload
+              </button>
               <a
                 href="/diagnostics"
+                onClick={() => track("run-diagnostics")}
                 className="inline-flex items-center text-xs font-medium rounded-lg border border-border px-3 py-1.5 hover:bg-muted"
               >
                 Run health check
