@@ -100,12 +100,12 @@ export function getLastChunkAttempt(): ChunkAttempt | null {
 export function persistIssue(issue: PersistedIssue) {
   if (typeof window === "undefined") return;
   try {
+    pushTimeline("first-error", `${issue.kind}:${issue.dependency ?? "?"}`);
     const withTimeline: PersistedIssue = {
       ...issue,
       timeline: issue.timeline ?? getTimeline(),
     };
     sessionStorage.setItem(LAST_ISSUE_KEY, JSON.stringify(withTimeline));
-    pushTimeline("first-error", `${issue.kind}:${issue.dependency ?? "?"}`);
   } catch {}
 }
 
