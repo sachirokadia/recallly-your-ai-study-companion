@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertTriangle, Loader2, X } from "lucide-react";
+import { pushTimeline } from "@/lib/diagnostics-client";
 
 const CRITICAL: Array<{ name: string; load: () => Promise<unknown> }> = [
   { name: "@radix-ui/react-slot", load: () => import("@radix-ui/react-slot") },
