@@ -61,6 +61,8 @@ export function RuntimeDiagnostics() {
         dependency: full.dependency,
         url: full.url,
         route: window.location.pathname,
+        lastChunkUrl: lastChunk?.url,
+        lastChunkAt: lastChunk?.at,
         at: full.at,
       });
       report({
