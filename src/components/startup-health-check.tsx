@@ -20,6 +20,7 @@ export function StartupHealthCheck() {
 
   useEffect(() => {
     let cancelled = false;
+    pushTimeline("health-check-start");
     (async () => {
       const results = await Promise.all(
         CRITICAL.map(async (c) => {
@@ -35,7 +36,7 @@ export function StartupHealthCheck() {
       const bad = results.filter((r) => !r.ok).map((r) => r.name);
       setFailed(bad);
       setStatus(bad.length ? "fail" : "ok");
-      // Auto-dismiss the green card after a moment.
+      pushTimeline("health-check-end", bad.length ? `fail:${bad.join(",")}` : "ok");
       if (bad.length === 0) setTimeout(() => setDismissed(true), 2500);
     })();
     return () => {
